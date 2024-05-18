@@ -35,7 +35,7 @@ def main(args):
     video_paths = get_video_list(args.paths)
     for path, filename in zip(video_paths["dirpath"], video_paths["filenames"]):
         input_path = path + "/" + filename[0]
-        output_path = path + "/" + path.split("/")[-1] + ".mkv"
+        output_path = path + "/"
         command = get_convert_command(
            input_path, output_path
         )
