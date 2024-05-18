@@ -4,7 +4,7 @@ from itertools import chain
 import os
 from glob import glob
 
-BASH_CONVERT_COMMAND = "makemkvcon mkv --robot PATH_VIDEO_TS all OUTPUT_FOLDER"
+BASH_CONVERT_COMMAND = "makemkvcon mkv --robot 'PATH_VIDEO_TS' all 'OUTPUT_FOLDER'"
 
 
 def get_convert_command(file, output_path):
@@ -18,10 +18,7 @@ def get_video_list(paths: list, file_name="VIDEO_TS.IFO"):
     for dirpath, dirnames, filenames in chain.from_iterable(
         os.walk(path) for path in paths
     ):
-        filenames = list(
-            # filter(lambda x: x.split(".")[-1] == file_extension, filenames)
-            filter(lambda x: x == file_name, filenames)
-        )
+        filenames = list(filter(lambda x: x == file_name, filenames))
         if filenames:
             filenames.sort()
             tmp = pd.DataFrame({"dirpath": dirpath, "filenames": [filenames]})
@@ -31,16 +28,18 @@ def get_video_list(paths: list, file_name="VIDEO_TS.IFO"):
 
 def convert_video(file, output_path):
     command = get_convert_command(file, output_path)
-    subprocess.check_output(
-        command, shell=True, executable="/bin/bash"
-    )
+    subprocess.check_output(command, shell=True, executable="/bin/bash")
+
 
 def main(args):
     video_paths = get_video_list(args.paths)
     for path, filename in zip(video_paths["dirpath"], video_paths["filenames"]):
-        command = get_convert_command(path+"/"+filename[0], path+"/")
+        command = get_convert_command(
+            path + "/" + filename[0], path + "/" + path + ".mkv"
+        )
         print(command)
-        convert_video(path+"/"+filename[0], path+"/")
+        convert_video(path + "/" + filename[0], path.split("/")[-1] + "/")
+
 
 from collections import namedtuple
 
