@@ -34,11 +34,15 @@ def convert_video(file, output_path):
 def main(args):
     video_paths = get_video_list(args.paths)
     for path, filename in zip(video_paths["dirpath"], video_paths["filenames"]):
+        input_path = path + "/" + filename[0]
+        output_path = path + "/" + path.split("/")[-1] + ".mkv"
         command = get_convert_command(
-            path + "/" + filename[0], path + "/" + path + ".mkv"
+           input_path, output_path
         )
         print(command)
-        convert_video(path + "/" + filename[0], path.split("/")[-1] + "/")
+        convert_video(
+            input_path, output_path
+        )
 
 
 from collections import namedtuple
