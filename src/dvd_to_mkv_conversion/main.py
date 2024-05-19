@@ -21,7 +21,9 @@ def get_video_list(paths: list, file_name="VIDEO_TS.IFO"):
         filenames = list(filter(lambda x: x == file_name, filenames))
         if filenames:
             filenames.sort()
-            tmp = pd.DataFrame({"dirpath": dirpath, "filenames": [filenames]})
+            tmp = pd.DataFrame(
+                {"dirpath": dirpath, "filenames": [filenames], "converted": False}
+            )
             df = pd.concat([df, tmp], ignore_index=True)
     return df
 
@@ -33,16 +35,18 @@ def convert_video(file, output_path):
 
 def main(args):
     video_paths = get_video_list(args.paths)
-    for path, filename in zip(video_paths["dirpath"], video_paths["filenames"]):
-        input_path = path + "/" + filename[0]
-        output_path = path + "/"
-        command = get_convert_command(
-           input_path, output_path
-        )
+    for index, row in video_paths.iterrows():
+        input_path = row["dirpath"] + "/" + row["filenames"][0]
+        output_path = row["dirpath"] + "/"
+        command = get_convert_command(input_path, output_path)
         print(command)
-        convert_video(
-            input_path, output_path
-        )
+        try:
+            convert_video(
+                input_path, output_path
+            )
+            video_paths.loc[index, ("converted")] = True
+        except Exception as e: print(e)
+    video_paths.to_csv("stats.csv")
 
 
 from collections import namedtuple
